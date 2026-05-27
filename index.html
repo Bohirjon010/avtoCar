@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Avto.uz — Professional autoservis xizmati. Toshkentdagi eng ishonchli avtomobil ta'mirlash markazi. Motor ta'miri, diagnostika, moy almashtirish va ko'proq.">
+<meta name="keywords" content="autoservis, avtomobil ta'miri, diagnostika, motor ta'miri, Toshkent, avto xizmat">
+<title>Avto.uz — Professional Autoservis</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;500;600;700&family=Barlow+Condensed:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  :root {
+    --red: #E8152A;
+    --red-dark: #B80F1F;
+    --red-glow: rgba(232,21,42,0.35);
+    --black: #0A0A0A;
+    --black-2: #111111;
+    --black-3: #1A1A1A;
+    --black-4: #222222;
+    --white: #F5F5F0;
+    --white-dim: rgba(245,245,240,0.6);
+    --white-faint: rgba(245,245,240,0.08);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: 'Barlow', sans-serif;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* Custom cursor */
+  .cursor {
+    width: 12px; height: 12px;
+    background: var(--red);
+    border-radius: 50%;
+    position: fixed; top: 0; left: 0;
+    pointer-events: none; z-index: 9999;
+    transition: transform 0.15s ease;
+    mix-blend-mode: normal;
+  }
+  .cursor-ring {
+    width: 36px; height: 36px;
+    border: 1.5px solid rgba(232,21,42,0.5);
+    border-radius: 50%;
+    position: fixed; top: 0; left: 0;
+    pointer-events: none; z-index: 9998;
+    transition: transform 0.35s ease, width 0.2s, height 0.2s;
+  }
+  .cursor-ring.hover { width: 56px; height: 56px; border-color: var(--red); }
+
+  /* Noise texture overlay */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 1; opacity: 0.35;
+  }
+
+  /* ---- NAV ---- */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    padding: 0 5%;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 72px;
+    transition: background 0.4s, backdrop-filter 0.4s;
+  }
+  nav.scrolled {
+    background: rgba(10,10,10,0.92);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(232,21,42,0.15);
+  }
+  .nav-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem; letter-spacing: 0.05em;
+    color: var(--white);
+  }
+  .nav-logo span { color: var(--red); }
+  .nav-links { display: flex; gap: 2.5rem; align-items: center; }
+  .nav-links a {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.9rem; font-weight: 600; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--white-dim);
+    text-decoration: none;
+    transition: color 0.2s;
+    position: relative;
+  }
+  .nav-links a::after {
+    content: ''; position: absolute; bottom: -4px; left: 0;
+    width: 0; height: 1.5px; background: var(--red);
+    transition: width 0.3s;
+  }
+  .nav-links a:hover { color: var(--white); }
+  .nav-links a:hover::after { width: 100%; }
+  .nav-cta {
+    background: var(--red);
+    color: var(--white) !important;
+    padding: 0.5rem 1.4rem;
+    border-radius: 2px;
+  }
+  .nav-cta::after { display: none !important; }
+  .nav-cta:hover { background: var(--red-dark) !important; color: var(--white) !important; }
+
+  /* Hamburger */
+  .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; }
+  .hamburger span { width: 26px; height: 2px; background: var(--white); transition: 0.3s; display: block; }
+  .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .hamburger.open span:nth-child(2) { opacity: 0; }
+  .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+  .mobile-menu {
+    display: none; position: fixed; inset: 0; top: 72px;
+    background: rgba(10,10,10,0.97); backdrop-filter: blur(20px);
+    z-index: 99; flex-direction: column; align-items: center; justify-content: center; gap: 2.5rem;
+  }
+  .mobile-menu.open { display: flex; }
+  .mobile-menu a {
+    font-family: 'Bebas Neue', sans-serif; font-size: 2.5rem; letter-spacing: 0.1em;
+    color: var(--white); text-decoration: none;
+    transition: color 0.2s;
+  }
+  .mobile-menu a:hover { color: var(--red); }
+
+  /* ---- HERO ---- */
+  #hero {
+    height: 100vh; min-height: 600px;
+    position: relative; overflow: hidden;
+    display: flex; align-items: center;
+  }
+  .hero-bg {
+    position: absolute; inset: 0;
+    background: url('https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=1600&q=80') center/cover no-repeat;
+  }
+  .hero-bg::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(105deg, rgba(10,10,10,0.96) 40%, rgba(10,10,10,0.6) 100%);
+  }
+  .hero-accent {
+    position: absolute; right: 0; top: 0; bottom: 0;
+    width: 6px;
+    background: linear-gradient(180deg, transparent, var(--red), transparent);
+    opacity: 0.7;
+  }
+  .hero-content {
+    position: relative; z-index: 2;
+    padding: 0 5%; max-width: 800px;
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 0.6rem;
+    background: var(--white-faint);
+    border: 1px solid rgba(232,21,42,0.3);
+    border-radius: 2px;
+    padding: 0.4rem 1rem;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.78rem; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--red); margin-bottom: 1.5rem;
+    animation: fadeUp 0.8s ease both;
+  }
+  .hero-badge::before { content: '●'; font-size: 0.5rem; animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  .hero-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(3.5rem, 9vw, 8rem);
+    line-height: 0.95; letter-spacing: 0.02em;
+    animation: fadeUp 0.8s 0.15s ease both;
+  }
+  .hero-title .accent { color: var(--red); display: block; }
+  .hero-subtitle {
+    font-family: 'Barlow', sans-serif;
+    font-size: clamp(1rem, 2.2vw, 1.25rem);
+    color: var(--white-dim); font-weight: 300; letter-spacing: 0.04em;
+    margin: 1.5rem 0 2.5rem;
+    animation: fadeUp 0.8s 0.3s ease both;
+    max-width: 480px; line-height: 1.6;
+  }
+  .hero-btns {
+    display: flex; gap: 1rem; flex-wrap: wrap;
+    animation: fadeUp 0.8s 0.45s ease both;
+  }
+  .btn-primary {
+    background: var(--red);
+    color: var(--white);
+    padding: 0.9rem 2.2rem;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+    border: none; border-radius: 2px;
+    cursor: pointer; text-decoration: none;
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+    box-shadow: 0 0 0 0 var(--red-glow);
+  }
+  .btn-primary:hover {
+    background: var(--red-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px var(--red-glow);
+  }
+  .btn-secondary {
+    background: transparent;
+    color: var(--white);
+    padding: 0.9rem 2.2rem;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+    border: 1.5px solid rgba(245,245,240,0.3);
+    border-radius: 2px;
+    cursor: pointer; text-decoration: none;
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    transition: border-color 0.2s, color 0.2s, transform 0.2s;
+  }
+  .btn-secondary:hover {
+    border-color: var(--white);
+    transform: translateY(-2px);
+  }
+  .hero-scroll {
+    position: absolute; bottom: 2.5rem; left: 5%;
+    display: flex; align-items: center; gap: 0.8rem;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.75rem; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--white-dim); z-index: 2;
+    animation: fadeUp 0.8s 0.7s ease both;
+  }
+  .scroll-line {
+    width: 40px; height: 1px; background: var(--red);
+    animation: scrollPulse 2s infinite;
+  }
+  @keyframes scrollPulse { 0%{width:40px} 50%{width:70px} 100%{width:40px} }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ---- SECTION BASE ---- */
+  section { padding: 7rem 5%; }
+  .section-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.75rem; letter-spacing: 0.3em; text-transform: uppercase;
+    color: var(--red); margin-bottom: 0.8rem;
+    display: flex; align-items: center; gap: 0.8rem;
+  }
+  .section-label::before { content: ''; width: 30px; height: 1.5px; background: var(--red); display: block; }
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2.5rem, 6vw, 5rem);
+    letter-spacing: 0.02em; line-height: 1;
+    margin-bottom: 1.5rem;
+  }
+  .section-desc {
+    font-size: 1rem; font-weight: 300; color: var(--white-dim);
+    line-height: 1.7; max-width: 520px;
+  }
+
+  /* ---- SERVICES ---- */
+  #services { background: var(--black-2); }
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5px;
+    margin-top: 4rem;
+    border: 1.5px solid var(--black-4);
+  }
+  .service-card {
+    background: var(--black-3);
+    padding: 2.5rem 2rem;
+    position: relative; overflow: hidden;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+  .service-card::before {
+    content: '';
+    position: absolute; bottom: 0; left: 0;
+    width: 0; height: 2px;
+    background: var(--red);
+    transition: width 0.4s ease;
+  }
+  .service-card:hover::before { width: 100%; }
+  .service-card:hover { background: #1e1e1e; }
+  .service-card:hover .service-icon { color: var(--red); transform: scale(1.1); }
+  .service-icon {
+    font-size: 2.2rem; margin-bottom: 1.2rem;
+    transition: color 0.3s, transform 0.3s;
+    display: block;
+  }
+  .service-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1.2rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+    margin-bottom: 0.6rem;
+  }
+  .service-desc { font-size: 0.88rem; color: var(--white-dim); line-height: 1.6; }
+  .service-num {
+    position: absolute; top: 1.5rem; right: 1.5rem;
+    font-family: 'Bebas Neue', sans-serif; font-size: 3rem;
+    color: rgba(245,245,240,0.04); line-height: 1;
+  }
+
+  /* ---- ABOUT ---- */
+  #about { background: var(--black); }
+  .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: center; margin-top: 1rem; }
+  .about-img-wrap {
+    position: relative;
+  }
+  .about-img-wrap img {
+    width: 100%; height: 520px; object-fit: cover;
+    display: block; filter: grayscale(20%);
+  }
+  .about-img-accent {
+    position: absolute; top: -20px; left: -20px;
+    width: 60%; height: 60%;
+    border: 2px solid var(--red);
+    z-index: -1;
+  }
+  .about-img-badge {
+    position: absolute; bottom: -20px; right: -20px;
+    background: var(--red);
+    padding: 1.5rem 2rem;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem; letter-spacing: 0.05em;
+    line-height: 1.3;
+  }
+  .about-features { display: flex; flex-direction: column; gap: 1.8rem; margin-top: 2.5rem; }
+  .about-feature { display: flex; align-items: flex-start; gap: 1.2rem; }
+  .feature-icon-wrap {
+    width: 48px; height: 48px; flex-shrink: 0;
+    background: var(--white-faint);
+    border: 1px solid rgba(232,21,42,0.2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem;
+  }
+  .feature-title { font-family: 'Barlow Condensed', sans-serif; font-size: 1rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 0.3rem; }
+  .feature-desc { font-size: 0.85rem; color: var(--white-dim); line-height: 1.5; }
+
+  /* ---- STATS ---- */
+  #stats {
+    background: var(--red);
+    padding: 5rem 5%;
+  }
+  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2rem; }
+  .stat-item { text-align: center; }
+  .stat-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(3rem, 6vw, 5rem);
+    letter-spacing: 0.02em; line-height: 1;
+    display: block;
+  }
+  .stat-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.85rem; font-weight: 600; letter-spacing: 0.15em;
+    text-transform: uppercase; opacity: 0.8;
+    margin-top: 0.3rem;
+  }
+  .stat-divider { width: 1px; background: rgba(245,245,240,0.2); display: block; }
+
+  /* ---- GALLERY ---- */
+  #gallery { background: var(--black-2); }
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: 280px 280px;
+    gap: 6px;
+    margin-top: 3.5rem;
+  }
+  .gallery-item {
+    overflow: hidden; position: relative; cursor: pointer;
+  }
+  .gallery-item:first-child { grid-row: span 2; }
+  .gallery-item img {
+    width: 100%; height: 100%; object-fit: cover;
+    transition: transform 0.6s ease, filter 0.4s;
+    filter: grayscale(30%);
+  }
+  .gallery-item:hover img { transform: scale(1.06); filter: grayscale(0%); }
+  .gallery-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg, transparent 50%, rgba(10,10,10,0.8) 100%);
+    opacity: 0; transition: opacity 0.3s;
+    display: flex; align-items: flex-end; padding: 1.5rem;
+  }
+  .gallery-item:hover .gallery-overlay { opacity: 1; }
+  .gallery-tag {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.8rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase;
+    background: var(--red); padding: 0.3rem 0.8rem;
+  }
+
+  /* ---- REVIEWS ---- */
+  #reviews { background: var(--black); }
+  .reviews-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.5rem; margin-top: 3.5rem; }
+  .review-card {
+    background: var(--black-3);
+    border: 1px solid var(--black-4);
+    padding: 2rem 1.8rem;
+    position: relative; overflow: hidden;
+    transition: border-color 0.3s, transform 0.3s;
+  }
+  .review-card:hover { border-color: rgba(232,21,42,0.3); transform: translateY(-4px); }
+  .review-quote {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 5rem; line-height: 0.7;
+    color: rgba(232,21,42,0.15); margin-bottom: 1rem;
+    display: block;
+  }
+  .review-text { font-size: 0.92rem; color: var(--white-dim); line-height: 1.7; margin-bottom: 1.5rem; }
+  .review-stars { color: var(--red); font-size: 0.9rem; letter-spacing: 2px; margin-bottom: 1.2rem; }
+  .review-author { display: flex; align-items: center; gap: 0.8rem; }
+  .review-avatar {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: var(--black-4); overflow: hidden;
+    border: 2px solid rgba(232,21,42,0.3);
+  }
+  .review-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .review-name { font-family: 'Barlow Condensed', sans-serif; font-size: 1rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; }
+  .review-role { font-size: 0.78rem; color: var(--white-dim); }
+
+  /* ---- CONTACT ---- */
+  #contact { background: var(--black-2); }
+  .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; margin-top: 3.5rem; align-items: start; }
+  .contact-info { display: flex; flex-direction: column; gap: 1.5rem; }
+  .contact-item {
+    display: flex; align-items: center; gap: 1.2rem;
+    padding: 1.2rem 1.5rem;
+    background: var(--black-3);
+    border: 1px solid var(--black-4);
+    border-left: 3px solid var(--red);
+    transition: transform 0.2s;
+  }
+  .contact-item:hover { transform: translateX(4px); }
+  .contact-icon { font-size: 1.4rem; flex-shrink: 0; }
+  .contact-label { font-family: 'Barlow Condensed', sans-serif; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; color: var(--red); margin-bottom: 0.2rem; }
+  .contact-value { font-size: 0.95rem; font-weight: 500; }
+  .map-wrap {
+    height: 380px; overflow: hidden;
+    border: 1px solid var(--black-4);
+    position: relative;
+  }
+  .map-wrap iframe { width: 100%; height: 100%; border: none; filter: grayscale(80%) invert(90%); }
+
+  /* ---- FOOTER ---- */
+  footer {
+    background: var(--black);
+    border-top: 1px solid var(--black-4);
+    padding: 4rem 5% 2rem;
+  }
+  .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 4rem; margin-bottom: 3rem; }
+  .footer-logo { font-family: 'Bebas Neue', sans-serif; font-size: 2.2rem; letter-spacing: 0.05em; margin-bottom: 0.8rem; }
+  .footer-logo span { color: var(--red); }
+  .footer-desc { font-size: 0.88rem; color: var(--white-dim); line-height: 1.7; max-width: 280px; }
+  .footer-socials { display: flex; gap: 0.8rem; margin-top: 1.5rem; }
+  .social-btn {
+    width: 40px; height: 40px;
+    background: var(--black-3); border: 1px solid var(--black-4);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem; text-decoration: none; color: var(--white-dim);
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+  }
+  .social-btn:hover { background: var(--red); color: var(--white); border-color: var(--red); }
+  .footer-col-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.8rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--red); margin-bottom: 1.2rem;
+  }
+  .footer-links { list-style: none; display: flex; flex-direction: column; gap: 0.7rem; }
+  .footer-links a {
+    font-size: 0.88rem; color: var(--white-dim); text-decoration: none;
+    transition: color 0.2s;
+  }
+  .footer-links a:hover { color: var(--white); }
+  .footer-bottom {
+    border-top: 1px solid var(--black-4);
+    padding-top: 1.5rem;
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 0.8rem; color: rgba(245,245,240,0.3);
+    flex-wrap: wrap; gap: 1rem;
+  }
+  .footer-bottom span { color: var(--red); }
+
+  /* ---- SCROLL REVEAL ---- */
+  .reveal {
+    opacity: 0; transform: translateY(40px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+  .reveal-delay-1 { transition-delay: 0.1s; }
+  .reveal-delay-2 { transition-delay: 0.2s; }
+  .reveal-delay-3 { transition-delay: 0.3s; }
+
+  /* ---- RESPONSIVE ---- */
+  @media (max-width: 1024px) {
+    .about-grid { grid-template-columns: 1fr; }
+    .about-img-wrap img { height: 380px; }
+    .footer-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 768px) {
+    section { padding: 5rem 5%; }
+    .nav-links { display: none; }
+    .hamburger { display: flex; }
+    .hero-title { font-size: clamp(2.8rem, 12vw, 5rem); }
+    .stats-grid { grid-template-columns: repeat(2,1fr); }
+    .gallery-grid { grid-template-columns: 1fr 1fr; grid-template-rows: unset; }
+    .gallery-item:first-child { grid-row: span 1; }
+    .reviews-grid { grid-template-columns: 1fr; }
+    .contact-grid { grid-template-columns: 1fr; }
+    .footer-grid { grid-template-columns: 1fr; gap: 2rem; }
+    .footer-bottom { flex-direction: column; text-align: center; }
+    .about-img-accent { display: none; }
+    .about-img-badge { right: 0; bottom: 0; }
+    .cursor, .cursor-ring { display: none; }
+    body { cursor: auto; }
+  }
+  @media (max-width: 480px) {
+    .stats-grid { grid-template-columns: 1fr 1fr; }
+    .gallery-grid { grid-template-columns: 1fr; }
+    .hero-btns { flex-direction: column; }
+    .btn-primary, .btn-secondary { text-align: center; justify-content: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Custom Cursor -->
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- NAV -->
+<nav id="navbar">
+  <div class="nav-logo">AVTO<span>.UZ</span></div>
+  <div class="nav-links">
+    <a href="#services">Xizmatlar</a>
+    <a href="#about">Biz haqimizda</a>
+    <a href="#gallery">Galereya</a>
+    <a href="#reviews">Fikrlar</a>
+    <a href="#contact" class="nav-cta">Bog'lanish</a>
+  </div>
+  <div class="hamburger" id="hamburger">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#services" onclick="closeMenu()">Xizmatlar</a>
+  <a href="#about" onclick="closeMenu()">Biz haqimizda</a>
+  <a href="#gallery" onclick="closeMenu()">Galereya</a>
+  <a href="#reviews" onclick="closeMenu()">Fikrlar</a>
+  <a href="#contact" onclick="closeMenu()">Bog'lanish</a>
+</div>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-accent"></div>
+  <div class="hero-content">
+    <!-- <div class="hero-badge">Toshkentning №1 Autoservisi</div> -->
+    <h1 class="hero-title">
+      Professional<br>
+      <span class="accent">Autoservis</span><br>
+      Xizmati
+    </h1>
+    <p class="hero-subtitle">Mashinangiz bizning ishonchli qo'llarda. Zamonaviy uskunalar va tajribali ustalar bilan tez, sifatli xizmat.</p>
+    <div class="hero-btns">
+      <a href="#contact" class="btn-primary">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013 7.18 19.79 19.79 0 01.68 4.24 2 2 0 012.67 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.5 9.91a16 16 0 006.29 6.29l1.27-1.42a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
+        Bog'lanish
+      </a>
+      <a href="#services" class="btn-secondary">
+        Xizmatlar
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+  </div>
+  <div class="hero-scroll">
+    <div class="scroll-line"></div>
+    Pastga aylantiring
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section id="services">
+  <div class="reveal">
+    <div class="section-label">Bizning imkoniyatlar</div>
+    <h2 class="section-title">XIZMATLARIMIZ</h2>
+    <p class="section-desc">Avtomobilingiz uchun barcha turdagi professional xizmatlarni taqdim etamiz — diagnostikadan to kuzov ishlarigacha.</p>
+  </div>
+  <div class="services-grid">
+    <div class="service-card reveal reveal-delay-1">
+      <div class="service-num">01</div>
+      <span class="service-icon">🔧</span>
+      <div class="service-name">Motor Ta'miri</div>
+      <p class="service-desc">Dvigatel tashxisi va ta'miri. Har qanday murakkabliktagi motor muammolarini hal qilamiz.</p>
+    </div>
+    <div class="service-card reveal reveal-delay-2">
+      <div class="service-num">02</div>
+      <span class="service-icon">💻</span>
+      <div class="service-name">Kompyuter Diagnostika</div>
+      <p class="service-desc">Zamonaviy uskunalar yordamida avtomobilingizning barcha tizimlarini to'liq tekshiramiz.</p>
+    </div>
+    <div class="service-card reveal reveal-delay-3">
+      <div class="service-num">03</div>
+      <span class="service-icon">🛢️</span>
+      <div class="service-name">Moy Almashtirish</div>
+      <p class="service-desc">Original sifatli moylash materiallari bilan tez va sifatli moy almashtirish xizmati.</p>
+    </div>
+    <div class="service-card reveal reveal-delay-1">
+      <div class="service-num">04</div>
+      <span class="service-icon">⚡</span>
+      <div class="service-name">Elektrik Xizmati</div>
+      <p class="service-desc">Avtomobil elektr tizimlarini tashxis qilish va ta'mirlash. Akkumulyator, generator va boshqalar.</p>
+    </div>
+    <div class="service-card reveal reveal-delay-2">
+      <div class="service-num">05</div>
+      <span class="service-icon">🏎️</span>
+      <div class="service-name">Shinomontaj</div>
+      <p class="service-desc">Shina almashtirish, muvozanatlash va tekshirish. Barcha o'lchamdagi shinalar bilan ishlaymiz.</p>
+    </div>
+    <div class="service-card reveal reveal-delay-3">
+      <div class="service-num">06</div>
+      <span class="service-icon">🔨</span>
+      <div class="service-name">Kuzov Ishlari</div>
+      <p class="service-desc">Kuzov ta'miri, bo'yash va polishing. Avtomobilingizni asl holatiga qaytaramiz.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="about-grid">
+    <div class="about-img-wrap reveal">
+      <div class="about-img-accent"></div>
+      <img src="https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?w=800&q=80" alt="Ustaxona">
+      <div class="about-img-badge">
+        10+ Yil<br>Tajriba
+      </div>
+    </div>
+    <div class="reveal reveal-delay-2">
+      <div class="section-label">Nima uchun biz?</div>
+      <h2 class="section-title">BIZ HAQIMIZDA</h2>
+      <p class="section-desc">2014-yildan beri Toshkentning eng ishonchli autoservis markazi sifatida faoliyat yuritib kelmoqdamiz. Har bir avtomobil bizga alohida e'tibor va parvarish bilan qaraladi.</p>
+      <div class="about-features">
+        <div class="about-feature">
+          <div class="feature-icon-wrap">🎓</div>
+          <div>
+            <div class="feature-title">Tajribali Ustalar</div>
+            <p class="feature-desc">20+ yillik tajribaga ega sertifikatlangan mutaxassislar jamoasi. Har qanday muammoni hal qila olamiz.</p>
+          </div>
+        </div>
+        <div class="about-feature">
+          <div class="feature-icon-wrap">🏭</div>
+          <div>
+            <div class="feature-title">Zamonaviy Uskunalar</div>
+            <p class="feature-desc">Yevropa standartlaridagi eng zamonaviy diagnostika va ta'mirlash uskunalari bilan jihozlangan.</p>
+          </div>
+        </div>
+        <div class="about-feature">
+          <div class="feature-icon-wrap">⚡</div>
+          <div>
+            <div class="feature-title">Tez va Sifatli</div>
+            <p class="feature-desc">Vaqtingizni qadrlаymiz. Ko'pchilik ta'mirlash ishlarini bir kun ichida tugallaymiz.</p>
+          </div>
+        </div>
+        <div class="about-feature">
+          <div class="feature-icon-wrap">🕐</div>
+          <div>
+            <div class="feature-title">24/7 Qo'llab-Quvvatlash</div>
+            <p class="feature-desc">Avariya holatlarida ham sizga yordam berishga tayyormiz. Har doim muloqotdamiz.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section id="stats">
+  <div class="stats-grid">
+    <div class="stat-item reveal">
+      <span class="stat-num" data-target="5000">0</span>
+      <div class="stat-label">Mamnun Mijozlar</div>
+    </div>
+    <div class="stat-item reveal reveal-delay-1">
+      <span class="stat-num" data-target="10">0</span>
+      <div class="stat-label">Yil Tajriba</div>
+    </div>
+    <div class="stat-item reveal reveal-delay-2">
+      <span class="stat-num">24/7</span>
+      <div class="stat-label">Servis Vaqti</div>
+    </div>
+    <div class="stat-item reveal reveal-delay-3">
+      <span class="stat-num">100%</span>
+      <div class="stat-label">Sifat Kafolati</div>
+    </div>
+  </div>
+</section>
+
+<!-- GALLERY -->
+<section id="gallery">
+  <div class="reveal">
+    <div class="section-label">Ishlarimiz</div>
+    <h2 class="section-title">GALEREYA</h2>
+    <p class="section-desc">Bizning ustaxona va bajarilib bo'lgan ishlardan namunalar. Har bir ish — alohida e'tibor.</p>
+  </div>
+  <div class="gallery-grid reveal">
+    <div class="gallery-item">
+      <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=800&q=80" alt="Avtomobil ta'miri">
+      <div class="gallery-overlay"><div class="gallery-tag">Motor Ta'miri</div></div>
+    </div>
+    <div class="gallery-item">
+      <img src="https://images.unsplash.com/photo-1566473965997-3de9c817e938?w=600&q=80" alt="Diagnostika">
+      <div class="gallery-overlay"><div class="gallery-tag">Diagnostika</div></div>
+    </div>
+    <div class="gallery-item">
+      <img src="https://images.unsplash.com/photo-1611566026373-c6c8da0ea861?w=600&q=80" alt="Kuzov ishlari">
+      <div class="gallery-overlay"><div class="gallery-tag">Kuzov Ishlari</div></div>
+    </div>
+    <div class="gallery-item">
+      <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80" alt="Shinomontaj">
+      <div class="gallery-overlay"><div class="gallery-tag">Shinomontaj</div></div>
+    </div>
+    <div class="gallery-item">
+      <img src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=600&q=80" alt="Premium xizmat">
+      <div class="gallery-overlay"><div class="gallery-tag">Premium Xizmat</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- REVIEWS -->
+<section id="reviews">
+  <div class="reveal">
+    <div class="section-label">Mijozlar fikri</div>
+    <h2 class="section-title">SHARHLAR</h2>
+    <p class="section-desc">Bizning mijozlarning real fikrlari va baholari. Ularning ishonchi — bizning g'ururumiz.</p>
+  </div>
+  <div class="reviews-grid">
+    <div class="review-card reveal reveal-delay-1">
+      <span class="review-quote">"</span>
+      <div class="review-stars">★★★★★</div>
+      <p class="review-text">Mashinamning dvigatel muammosi bor edi. Ustalar juda tez va professional ravishda hal qilishdi. Narx ham juda mos. Endi doim shu yerga kelaman. Tavsiya qilaman!</p>
+      <div class="review-author">
+        <div class="review-avatar">
+          <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&q=80" alt="Reviewer">
+        </div>
+        <div>
+          <div class="review-name">Jahongir Toshmatov</div>
+          <div class="review-role">Chevrolet Malibu egasi</div>
+        </div>
+      </div>
+    </div>
+    <div class="review-card reveal reveal-delay-2">
+      <span class="review-quote">"</span>
+      <div class="review-stars">★★★★★</div>
+      <p class="review-text">Kuzov bo'yash xizmatidan foydalandim. Natija ajoyib! Mashinam yangiday bo'lib chiqdi. Rangning to'g'ri tanlanishi va ishlov berishda juda professionallik ko'rsatishdi.</p>
+      <div class="review-author">
+        <div class="review-avatar">
+          <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80" alt="Reviewer">
+        </div>
+        <div>
+          <div class="review-name">Sardor Karimov</div>
+          <div class="review-role">BMW X5 egasi</div>
+        </div>
+      </div>
+    </div>
+    <div class="review-card reveal reveal-delay-3">
+      <span class="review-quote">"</span>
+      <div class="review-stars">★★★★★</div>
+      <p class="review-text">24/7 xizmati juda qulay. Kechqurun avariya bo'ldi, darhol yordam berishdi. Tezkor va sifatli xizmat. Bunday professional jamoa topish qiyin. Rahmat Avto.uz!</p>
+      <div class="review-author">
+        <div class="review-avatar">
+          <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&q=80" alt="Reviewer">
+        </div>
+        <div>
+          <div class="review-name">Bobur Yusupov</div>
+          <div class="review-role">Toyota Camry egasi</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="reveal">
+    <div class="section-label">Muloqot</div>
+    <h2 class="section-title">BOG'LANISH</h2>
+    <p class="section-desc">Savollaringiz bormi? Biz bilan bog'laning. 24/7 xizmatdamiz.</p>
+  </div>
+  <div class="contact-grid">
+    <div class="contact-info reveal">
+      <div class="contact-item">
+        <span class="contact-icon">📞</span>
+        <div>
+          <div class="contact-label">Telefon</div>
+          <div class="contact-value">+998 71 123 45 67</div>
+        </div>
+      </div>
+      <div class="contact-item">
+        <span class="contact-icon">✈️</span>
+        <div>
+          <div class="contact-label">Telegram</div>
+          <div class="contact-value">@avto_uz_servis</div>
+        </div>
+      </div>
+      <div class="contact-item">
+        <span class="contact-icon">📍</span>
+        <div>
+          <div class="contact-label">Manzil</div>
+          <div class="contact-value">Toshkent sh., Yunusobod tumani, Amir Temur ko'chasi, 15</div>
+        </div>
+      </div>
+      <div class="contact-item">
+        <span class="contact-icon">🕐</span>
+        <div>
+          <div class="contact-label">Ish Vaqti</div>
+          <div class="contact-value">24 soat, 7 kun</div>
+        </div>
+      </div>
+      <a href="tel:+998711234567" class="btn-primary" style="width:fit-content; margin-top:0.5rem;">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013 7.18 19.79 19.79 0 01.68 4.24 2 2 0 012.67 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.5 9.91a16 16 0 006.29 6.29l1.27-1.42a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
+        Hozir Qo'ng'iroq Qiling
+      </a>
+    </div>
+    <div class="map-wrap reveal reveal-delay-2">
+      <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2996.6745039765793!2d69.28!3d41.29!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNDHCsDE3JzI0LjAiTiA2OcKwMTYnNDguMCJF!5e0!3m2!1suz!2suz!4v1700000000000!5m2!1suz!2suz" allowfullscreen loading="lazy"></iframe>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div>
+      <div class="footer-logo">AVTO<span>.UZ</span></div>
+      <p class="footer-desc">Toshkentning eng ishonchli va professional autoservis markazi. 2014-yildan buyon siz bilan.</p>
+      <div class="footer-socials">
+        <a href="#" class="social-btn" title="Telegram">✈️</a>
+        <a href="#" class="social-btn" title="Instagram">📸</a>
+        <a href="#" class="social-btn" title="YouTube">▶️</a>
+        <a href="#" class="social-btn" title="Facebook">👍</a>
+      </div>
+    </div>
+    <div>
+      <div class="footer-col-title">Xizmatlar</div>
+      <ul class="footer-links">
+        <li><a href="#services">Motor Ta'miri</a></li>
+        <li><a href="#services">Diagnostika</a></li>
+        <li><a href="#services">Moy Almashtirish</a></li>
+        <li><a href="#services">Elektrik Xizmati</a></li>
+        <li><a href="#services">Shinomontaj</a></li>
+        <li><a href="#services">Kuzov Ishlari</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">Aloqa</div>
+      <ul class="footer-links">
+        <li><a href="tel:+998711234567">+998 71 123 45 67</a></li>
+        <li><a href="#">@avto_uz_servis</a></li>
+        <li><a href="#">Yunusobod, Toshkent</a></li>
+        <li><a href="#">24/7 Ochiq</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div>© 2024 <span>Avto.uz</span>. Barcha huquqlar himoyalangan.</div>
+    <div>Ishlab chiqildi ♥ Toshkentda</div>
+  </div>
+</footer>
+
+<script>
+  // Custom Cursor
+  const cursor = document.getElementById('cursor');
+  const cursorRing = document.getElementById('cursorRing');
+  let mx = 0, my = 0, rx = 0, ry = 0;
+
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    cursor.style.transform = `translate(${mx - 6}px, ${my - 6}px)`;
+  });
+
+  function animateRing() {
+    rx += (mx - rx) * 0.12;
+    ry += (my - ry) * 0.12;
+    cursorRing.style.transform = `translate(${rx - 18}px, ${ry - 18}px)`;
+    requestAnimationFrame(animateRing);
+  }
+  animateRing();
+
+  document.querySelectorAll('a, button, .service-card, .gallery-item, .review-card').forEach(el => {
+    el.addEventListener('mouseenter', () => cursorRing.classList.add('hover'));
+    el.addEventListener('mouseleave', () => cursorRing.classList.remove('hover'));
+  });
+
+  // Navbar scroll
+  const navbar = document.getElementById('navbar');
+  window.addEventListener('scroll', () => {
+    navbar.classList.toggle('scrolled', window.scrollY > 50);
+  });
+
+  // Hamburger
+  const hamburger = document.getElementById('hamburger');
+  const mobileMenu = document.getElementById('mobileMenu');
+  hamburger.addEventListener('click', () => {
+    hamburger.classList.toggle('open');
+    mobileMenu.classList.toggle('open');
+  });
+  function closeMenu() {
+    hamburger.classList.remove('open');
+    mobileMenu.classList.remove('open');
+  }
+
+  // Scroll reveal
+  const revealEls = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('visible'); }
+    });
+  }, { threshold: 0.12 });
+  revealEls.forEach(el => observer.observe(el));
+
+  // Counter animation
+  function animateCounter(el) {
+    const target = parseInt(el.dataset.target);
+    if (!target) return;
+    let count = 0;
+    const step = target / 60;
+    const interval = setInterval(() => {
+      count = Math.min(count + step, target);
+      el.textContent = Math.floor(count).toLocaleString() + (target >= 1000 ? '+' : '+');
+      if (count >= target) clearInterval(interval);
+    }, 16);
+  }
+
+  const statsObserver = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        document.querySelectorAll('[data-target]').forEach(animateCounter);
+        statsObserver.disconnect();
+      }
+    });
+  }, { threshold: 0.5 });
+  const statsSection = document.getElementById('stats');
+  if (statsSection) statsObserver.observe(statsSection);
+
+  // Smooth anchor scroll
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) {
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth' });
+      }
+    });
+  });
+</script>
+</body>
+</html>
